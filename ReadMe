@@ -9,7 +9,7 @@ Please visit the wiki at http://projectm.wiki.sf.net for build instructions.
 If you're lazy, just make sure you have cmake installed and type
 
 -
-cmake .
+mkdir build && cd build && cmake ..
 -
 
 then

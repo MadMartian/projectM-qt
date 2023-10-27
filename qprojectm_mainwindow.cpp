@@ -72,7 +72,7 @@ class PlaylistWriteFunctor {
 };
 
 QProjectM_MainWindow::QProjectM_MainWindow ( const std::string & config_file, QMutex * audioMutex)
-		:m_QPresetFileDialog ( new QPresetFileDialog ( this ) ), ui(0), m_QPlaylistFileDialog 
+		:m_QPresetFileDialog ( new QPresetFileDialog ( this ) ), ui(0), m_QPlaylistFileDialog
 		( new QPlaylistFileDialog ( this )), playlistModel(0), 
 		configDialog(0), hHeader(0), vHeader(0), _menuVisible(true), _menuAndStatusBarsVisible(true),
 activePresetIndex(new Nullable<long>), playlistItemCounter(0), m_QPresetEditorDialog(0)
@@ -133,7 +133,8 @@ void QProjectM_MainWindow::dockLocationChanged(Qt::DockWidgetArea area) {
 }
 
 #include <QMouseEvent>
-void QProjectM_MainWindow::popupPlaylistContextMenu(QMouseEvent * mouseEvent,const QModelIndexList & items) { 
+#include <QMessageBox>
+void QProjectM_MainWindow::popupPlaylistContextMenu(QMouseEvent * mouseEvent,const QModelIndexList & items) {
 	
 		 
 		selectedPlaylistIndexes = items;
@@ -643,16 +644,15 @@ void QProjectM_MainWindow::keyReleaseEvent ( QKeyEvent * e )
 
 void QProjectM_MainWindow::refreshHeaders(QResizeEvent * event) {
 	
-	
-	hHeader->setResizeMode ( 0, QHeaderView::Fixed);
-	hHeader->setResizeMode ( 1, QHeaderView::ResizeToContents);
+	hHeader->setSectionResizeMode ( 0, QHeaderView::Fixed);
+	hHeader->setSectionResizeMode ( 1, QHeaderView::ResizeToContents);
 	
 	const int numRatings =  qprojectM()->settings().softCutRatingsEnabled ? 2 : 1;
 
 	int sizeTotal = 0;
 	for (int i = 0; i < numRatings; i++) {
 		// Add 1 to skip the Name column
-		hHeader->setResizeMode (i+1, QHeaderView::ResizeToContents);
+		hHeader->setSectionResizeMode (i+1, QHeaderView::ResizeToContents);
 		sizeTotal += hHeader->sectionSize(i+1);
 	}				
 	hHeader->resizeSection(0, ui->tableView->size().width()-20-sizeTotal);
@@ -1004,11 +1004,11 @@ void QProjectM_MainWindow::refreshPlaylist()
 
 	if (hHeader)
 		disconnect(hHeader);
-	
+
 	hHeader = new QHeaderView ( Qt::Horizontal, this );
 	vHeader = new QHeaderView ( Qt::Vertical, this );
-	
-	hHeader->setClickable ( false );
+
+	hHeader->setSectionsClickable(false);
 	hHeader->setSortIndicatorShown ( false );
 
 	ui->tableView->setVerticalHeader ( vHeader );

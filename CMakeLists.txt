@@ -1,7 +1,7 @@
 
 project(projectM-qt) # the name of your project
-cmake_minimum_required(VERSION 2.4.0)
-cmake_policy(SET CMP0005 OLD)
+cmake_minimum_required(VERSION 3.22.0)
+cmake_policy(SET CMP0005 NEW)
 
 SET(CPACK_BINARY_RPM OFF)
 #SET(CPACK_BINARY_Z OFF)
@@ -14,7 +14,7 @@ SET(CPACK_PACKAGE_VERSION_PATCH "0")
 include(CPack)
 
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} )
-include(FindPkgConfig.cmake)
+find_package(PkgConfig REQUIRED)
 
 if (${CMAKE_PROJECT_NAME} MATCHES "PROJECTM_ROOT")
 	set(LIBPROJECTM_FOUND true)
@@ -24,14 +24,13 @@ endif(${CMAKE_PROJECT_NAME} MATCHES "PROJECTM_ROOT")
 
 OPTION(BUILD_PROJECTM_QT_STATIC "Build a static library of projectM-qt rather than the usual shared library format" OFF)
 
-find_package(Qt4 REQUIRED) # find and setup Qt4 for this project
-include(${QT_USE_FILE})
+find_package(Qt5 COMPONENTS Core Widgets OpenGL Xml REQUIRED) # find and setup Qt5 for this project
 
-if (QT4_FOUND)
-MESSAGE(STATUS "[projectM-qt] Qt4 detected.")
-else (QT4_FOUND)
-MESSAGE(FATAL_ERROR "Qt4 not detected. Please install Qt4 before continuing (visit www.trolltech.org for more info)")
-endif(QT4_FOUND)
+if (Qt5Core_FOUND AND Qt5Widgets_FOUND AND Qt5OpenGL_FOUND AND Qt5Xml_FOUND)
+MESSAGE(STATUS "[projectM-qt] Qt5 detected.")
+else (Qt5Core_FOUND AND Qt5Widgets_FOUND AND Qt5OpenGL_FOUND AND Qt5Xml_FOUND)
+MESSAGE(FATAL_ERROR "Not all required Qt5 components detected. Please install Qt5 Core, Widgets, OpenGL and Xml before continuing (visit www.trolltech.org for more info)")
+endif(Qt5Core_FOUND AND Qt5Widgets_FOUND AND Qt5OpenGL_FOUND AND Qt5Xml_FOUND)
 set(QT_USE_OPENGL TRUE)
 
 if (LIBPROJECTM_FOUND)
@@ -43,7 +42,7 @@ endif(LIBPROJECTM_FOUND)
 
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/libprojectM-qt.pc.in" "${CMAKE_CURRENT_SOURCE_DIR}/libprojectM-qt.pc" @ONLY)
 
-ADD_DEFINITIONS(-DLINUX -DPROJECTM_PREFIX='"${PROJECTM_PREFIX}"')
+ADD_DEFINITIONS(-DLINUX -DPROJECTM_PREFIX="${PROJECTM_PREFIX}")
 ADD_DEFINITIONS(${QT_DEFINITIONS})
 ADD_DEFINITIONS(-DQT_PLUGIN)
 ADD_DEFINITIONS(-DQT_NO_DEBUG)
@@ -97,12 +96,12 @@ set( projectM-qt_RESOURCES
 )
 
 # compile resources
-qt4_add_resources( projectM-qt_RC_SRCS ${projectM-qt_RESOURCES} )
+qt5_add_resources( projectM-qt_RC_SRCS ${projectM-qt_RESOURCES} )
 
-qt4_wrap_ui(projectM-qt_UIS_H ${projectM-qt_UIS})
+qt5_wrap_ui(projectM-qt_UIS_H ${projectM-qt_UIS})
 
 # After this call, foo_MOC_SRCS = moc_Class1.cxx moc_Class2.cxx moc_Class3.cxx.
-qt4_wrap_cpp(projectM-qt_MOC_SRCS ${projectM-qt_MOC_HDRS})
+qt5_wrap_cpp(projectM-qt_MOC_SRCS ${projectM-qt_MOC_HDRS})
 
 if(COMMAND cmake_policy)
       cmake_policy(SET CMP0003 NEW)
@@ -126,10 +125,10 @@ endif (${CMAKE_PROJECT_NAME} MATCHES "PROJECTM_ROOT")
 
 LINK_DIRECTORIES(${PROJECTM_LINK})
 
-include_directories(${PROJECTM_INCLUDE} ${QT_INCLUDE_DIR} ${QT_QTGUI_INCLUDE_DIR} ${QT_QTXML_INCLUDE_DIR} ${QT_QTOPENGL_INCLUDE_DIR} ${CMAKE_CURRENT_LIBRARY_DIR})
+include_directories(${PROJECTM_INCLUDE} ${Qt5Core_INCLUDE_DIRS} ${Qt5Widgets_INCLUDE_DIRS} ${Qt5Xml_INCLUDE_DIRS} ${Qt5OpenGL_INCLUDE_DIRS} ${CMAKE_CURRENT_LIBRARY_DIR})
 
 # link the "qprojectM" target against the Qt libraries. which libraries exactly, is defined by the "include(${QT_USE_FILE})" line above, which sets up this variable.
-target_link_libraries(projectM-qt projectM ${QT_QTGUI_LIBRARIES} ${QT_QTOPENGL_LIBRARIES} ${QT_QTXML_LIBRARIES} ${QT_LIBRARIES})
+target_link_libraries(projectM-qt projectM Qt5::Core Qt5::Widgets Qt5::OpenGL Qt5::Xml)
 
 install(FILES qprojectm_mainwindow.hpp DESTINATION include/libprojectM-qt)
 install(TARGETS projectM-qt DESTINATION lib${LIB_SUFFIX})

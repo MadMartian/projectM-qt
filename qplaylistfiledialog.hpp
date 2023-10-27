@@ -1,5 +1,5 @@
 /**
- * projectM-qt -- Qt4 based projectM GUI 
+ * projectM-qt -- Qt4 based projectM GUI
  * Copyright (C)2003-2004 projectM Team
  *
  * This library is free software; you can redistribute it and/or
@@ -36,26 +36,26 @@
      static QString OPEN_PLAYLIST_TITLE;
      static QString OPEN_PLAYLIST_OR_DIRECTORY_TITLE;
      static QString SAVE_PLAYLIST_TITLE;
-     
-     inline QPlaylistFileDialog(QWidget * parent = 0): 
+
+     inline QPlaylistFileDialog(QWidget * parent = 0):
 		QFileDialog(parent, OPEN_PLAYLIST_OR_DIRECTORY_TITLE, QString()), m_directorySelectAllowed(true), m_fileSelectAllowed(true) {
 
 	     updateFileMode(selectedFiles());
-	     
+
 	     //connect(this, SIGNAL(filesSelected(const QStringList&)),
 		//     this, SLOT(updateFileMode(const QStringList&)));
-	     
+
 	     connect(this, SIGNAL(currentChanged(const QString&)),
 		     this, SLOT(updateFileMode(const QString&)));
 	}
-	
+
 	inline bool isPlaylistSaveMode() {
 		return this->acceptMode() == QFileDialog::AcceptSave;
 	}
-	
+
 	inline void setPlaylistSaveMode(bool isSaveMode) {
 		if (isSaveMode) {
-			this->setAcceptMode(QFileDialog::AcceptSave);	
+			this->setAcceptMode(QFileDialog::AcceptSave);
 			updateWindowTitle();
 			updateFileMode(selectedFiles());
 		}
@@ -65,54 +65,50 @@
 			updateFileMode(selectedFiles());
 		}
 	}
-	
+
 	inline void setAllowDirectorySelect(bool isAllowed) {
 		m_directorySelectAllowed = isAllowed;
 		updateFileMode(selectedFiles());
 		updateWindowTitle();
 	}
-		
+
 	inline void setAllowFileSelect(bool isAllowed) {
-		m_fileSelectAllowed = isAllowed;	
+		m_fileSelectAllowed = isAllowed;
 		updateFileMode(selectedFiles());
 		updateWindowTitle();
 	}
-	
-	
+
+
 	inline bool isFileSelectAllowed() const {
-		return m_fileSelectAllowed;	
+		return m_fileSelectAllowed;
 	}
-	
-	
+
+
 	inline bool isDirectorySelectAllowed() const {
-		return m_directorySelectAllowed;		
+		return m_directorySelectAllowed;
 	}
-	
-	
-	
+
+
+
        ~QPlaylistFileDialog() { }
 
 	 private:
-		 
+
 		 bool m_directorySelectAllowed;
 		 bool m_fileSelectAllowed;
-		 QString getFilter() {
-			 QString filter;					 
+		 QDir::Filters getFilter() {
+			 QDir::Filters filter;
 			 if (isDirectorySelectAllowed()) {
-			 
-				 filter += "Directories";
+				 filter |= QDir::Dirs;
 			 }
-		 
-			 if (isFileSelectAllowed()) {			 
-				 if (filter != QString())
-					 filter += " and ";
-		
-				 filter += "Preset Playlists (*.ppl)"; 
-			 } 
-			 
-			 return filter;		 
+
+			 if (isFileSelectAllowed()) {
+				 filter |= QDir::Files;
+			 }
+
+			 return filter;
 		 }
-		 
+
 		 void updateWindowTitle() {
 			 if (isPlaylistSaveMode())
 				 setWindowTitle(SAVE_PLAYLIST_TITLE);
@@ -123,42 +119,46 @@
 					 setWindowTitle(OPEN_PLAYLIST_TITLE);
 			 }
 		 }
-		 
+
  private slots:
-	 
+
 	 void updateFileMode(const QString fileName) {
-		 
-		 QString filter = getFilter();
-		 		
-		 	
+
+		 QDir::Filters filter = getFilter();
+
+
 		if (fileName == QString()) {
 			 if (isPlaylistSaveMode())
 				 this->setFileMode(QFileDialog::AnyFile);
 			 else
 				 this->setFileMode(QFileDialog::ExistingFile);
-		}	
-		 
+		}
+
 		else if (QFileInfo(fileName).isDir()) {
 			if (isPlaylistSaveMode())
-				this->setFileMode(QFileDialog::AnyFile);			
-			 else if (isDirectorySelectAllowed())  
+				this->setFileMode(QFileDialog::AnyFile);
+			 else if (isDirectorySelectAllowed())
 			 	this->setFileMode(QFileDialog::Directory);
-			 else 
+			 else
 				 this->setFileMode(QFileDialog::ExistingFile);
 		}
          	else if (QFileInfo(fileName).isFile()) {
-			
+
 			 if (isPlaylistSaveMode())
 				 this->setFileMode(QFileDialog::AnyFile);
-			 else if (isFileSelectAllowed()) 
+			 else if (isFileSelectAllowed())
 				this->setFileMode(QFileDialog::ExistingFile);
 			 else
 				 this->setFileMode(QFileDialog::Directory);
 		}
-				
+
+		if (isFileSelectAllowed()) {
+			this->setNameFilter("Preset Playlists (*.ppl)");
+		}
+
 		this->setFilter(filter);
 	 }
-	 
+
 	 void updateFileMode(const QStringList & selectedFiles) {
 		 if (selectedFiles.empty())
 		 	updateFileMode(QString());
